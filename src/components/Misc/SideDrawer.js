@@ -19,6 +19,7 @@ import {
   Tooltip,
   useToast,
 } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/spinner";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { ChatState } from "../../context/ChatProvider";
@@ -90,9 +91,12 @@ const SideDrawer = () => {
       };
 
       const { data } = await axios.post("/api/chat", { userId }, config);
-      setLoadingChat(false);
+
+      if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
+
       setSelectedChat(data);
-      onclose();
+      setLoadingChat(false);
+      onClose();
     } catch (err) {
       toast({
         title: "Error fetching the chat",
@@ -184,6 +188,7 @@ const SideDrawer = () => {
                 />
               ))
             )}
+            {loadingChat && <Spinner ml="auto" display="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>
