@@ -27,6 +27,9 @@ import ProfileModal from "./ProfileModal";
 import { useNavigate } from "react-router-dom";
 import ChatLoading from "../ChatLoading";
 import UserListItem from "../UserAvatar/UserListItem";
+import { getSender } from "../../service/ChatLogic";
+import NotificationBadge from "react-notification-badge/lib/components/NotificationBadge";
+import { Effect } from "react-notification-badge";
 
 const SideDrawer = () => {
   const toast = useToast();
@@ -38,7 +41,14 @@ const SideDrawer = () => {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
 
-  const { user, setSelectedChat, chats, setChats } = ChatState();
+  const {
+    user,
+    setSelectedChat,
+    chats,
+    setChats,
+    notification,
+    setNotification,
+  } = ChatState();
 
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
@@ -136,9 +146,28 @@ const SideDrawer = () => {
         <div>
           <Menu>
             <MenuButton p="1">
+              <NotificationBadge
+                count={notification.length}
+                effect={Effect.SCALE}
+              />
               <BellIcon fontSize="2xl" m="1" />
-              {/* <MenuList></MenuList> */}
             </MenuButton>
+            <MenuList>
+              {!notification.length && "No new message"}
+              {notification.map((noti) => (
+                <MenuItem
+                  key={noti._id}
+                  onClick={() => {
+                    setSelectedChat(noti.chat);
+                    setNotification(notification.filter((n) => n !== noti));
+                  }}
+                >
+                  {noti.chat.isGroupChat
+                    ? `New Message in ${noti.chat.chatName}`
+                    : `New Message from ${getSender(user, noti.chat.users)}`}
+                </MenuItem>
+              ))}
+            </MenuList>
           </Menu>
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
